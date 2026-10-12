@@ -1,0 +1,17 @@
+{
+  "name": "mes-erp-report-validator",
+  "version": "1.0.0",
+  "description": "Hệ thống kiểm tra & phát hiện lỗi dữ liệu báo công MES/ERP",
+  "private": true,
+  "scripts": {
+    "start": "node -e \"const http=require('http'),fs=require('fs'),path=require('path');const mime={'.html':'text/html','.css':'text/css','.js':'application/javascript','.json':'application/json'};http.createServer((req,res)=>{let p=req.url.split('?')[0];if(p==='/')p='/index.html';let f=path.join(__dirname,p);if(fs.existsSync(f)){res.writeHead(200,{'Content-Type':mime[path.extname(f)]||'text/plain'});fs.createReadStream(f).pipe(res);}else{res.writeHead(404);res.end('Not found');}}).listen(process.env.PORT||3000,()=>console.log('Server running on port '+(process.env.PORT||3000)));\""
+  },
+  "keywords": [
+    "mes",
+    "erp",
+    "production-report",
+    "excel-validator"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

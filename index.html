@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Kiểm Tra & Phát Hiện Lỗi Dữ Liệu Báo Công MES/ERP</title>
+  <meta name="description" content="Công cụ tự động kiểm tra, phân tích và phát hiện các bất thường logic trong dữ liệu báo công sản xuất cơ khí chính xác.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%236366f1' d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>HỆ THỐNG PHÁT HIỆN LỖI BÁO CÔNG MES / ERP</h1>
+          <p>Kiểm tra tự động Nhảy cóc công đoạn, Trùng lặp, Sai số lượng & Cắt cụt luồng phái công</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="status-badge">
+          <span class="pulse-dot"></span>
+          <span>Sẵn sàng phân tích</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Upload & Dropzone Area -->
+    <section class="upload-card">
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h2 class="dropzone-title">Kéo thả file Excel vào đây hoặc dán (Ctrl+V)</h2>
+        <p class="dropzone-subtitle">Hỗ trợ các file báo công định dạng <strong>.xlsx, .xls, .csv</strong> hoặc sao chép bảng từ Excel</p>
+        
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+        
+        <div class="upload-actions">
+          <button class="btn btn-primary" id="btnSelectFile" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+            Chọn file từ máy tính
+          </button>
+
+          <button class="btn btn-danger" id="btnClear" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Xóa dữ liệu
+          </button>
+        </div>
+      </div>
+
+      <!-- File Loaded Info Bar -->
+      <div class="file-loaded-info" id="fileLoadedInfo" style="display: none;">
+        <div class="file-specs">
+          <div class="spec-item">
+            <span>Tên file:</span>
+            <strong id="infoFileName">--</strong>
+          </div>
+          <div class="spec-item">
+            <span>Tổng số dòng:</span>
+            <strong id="infoRowCount">0</strong>
+          </div>
+          <div class="spec-item">
+            <span>Dung lượng:</span>
+            <strong id="infoFileSize">0 KB</strong>
+          </div>
+        </div>
+        <div class="status-badge" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc;">
+          <span>✓ Đã hoàn tất đối soát logic</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI Dashboard Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card" style="--card-accent: #6366f1;">
+        <div class="kpi-header">
+          <span class="kpi-title">Tổng Dòng Báo Công</span>
+          <div class="kpi-icon">📊</div>
+        </div>
+        <div class="kpi-value" id="kpiTotalRows">0</div>
+        <div class="kpi-subtext">Dữ liệu bản ghi từ file Excel</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #06b6d4;">
+        <div class="kpi-header">
+          <span class="kpi-title">Tổng Lệnh Phái Công</span>
+          <div class="kpi-icon">📋</div>
+        </div>
+        <div class="kpi-value" id="kpiTotalDispatches">0</div>
+        <div class="kpi-subtext">Mã lệnh PGD được rà soát</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #f43f5e;">
+        <div class="kpi-header">
+          <span class="kpi-title">Lỗi Nghiêm Trọng</span>
+          <div class="kpi-icon">🚨</div>
+        </div>
+        <div class="kpi-value" id="kpiCritical" style="color: #fb7185;">0</div>
+        <div class="kpi-subtext">Nhảy cóc, Trùng lặp, Cắt cụt luồng</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #f59e0b;">
+        <div class="kpi-header">
+          <span class="kpi-title">Cảnh Báo Logic</span>
+          <div class="kpi-icon">⚠️</div>
+        </div>
+        <div class="kpi-value" id="kpiWarnings" style="color: #fbbf24;">0</div>
+        <div class="kpi-subtext">Báo khống tròn số, Thao tác dư thừa</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #ec4899;">
+        <div class="kpi-header">
+          <span class="kpi-title">Lệnh Có Vi Phạm</span>
+          <div class="kpi-icon">❌</div>
+        </div>
+        <div class="kpi-value" id="kpiFlawedDispatches">0</div>
+        <div class="kpi-subtext">Lệnh phái công bị lỗi ít nhất 1 bước</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: #10b981;">
+        <div class="kpi-header">
+          <span class="kpi-title">Độ Tin Cậy Dữ Liệu</span>
+          <div class="kpi-icon">🛡️</div>
+        </div>
+        <div class="kpi-value" id="kpiIntegrity">100%</div>
+        <div class="kpi-subtext">Chỉ số toàn vẹn luồng MES/ERP</div>
+      </div>
+    </section>
+
+    <!-- Filter Category Tabs -->
+    <div class="filter-tabs">
+      <button class="tab-btn active" data-category="all">
+        Tất cả phát hiện <span class="tab-count" id="count-all">0</span>
+      </button>
+      <button class="tab-btn" data-category="bypass">
+        🔀 Nhảy cóc / Cắt cụt / Bỏ qua <span class="tab-count" id="count-bypass">0</span>
+      </button>
+      <button class="tab-btn" data-category="duplicate">
+        🔁 Trùng lặp công đoạn <span class="tab-count" id="count-duplicate">0</span>
+      </button>
+      <button class="tab-btn" data-category="quantity">
+        🔢 Bất thường số lượng <span class="tab-count" id="count-quantity">0</span>
+      </button>
+      <button class="tab-btn" data-category="ticket">
+        ⚠️ Sai loại chứng từ <span class="tab-count" id="count-ticket">0</span>
+      </button>
+    </div>
+
+    <!-- Toolbar: Search, Severity Filter & Exports -->
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm theo mã PGD, tên công đoạn, dòng Excel...">
+      </div>
+
+      <div class="toolbar-actions">
+        <select id="severityFilter" class="btn btn-secondary" style="padding: 9px 14px; outline: none;">
+          <option value="all">Mọi mức độ</option>
+          <option value="critical">Chỉ lỗi nghiêm trọng (Critical)</option>
+          <option value="warning">Chỉ cảnh báo (Warning)</option>
+        </select>
+
+        <button class="btn btn-secondary" id="btnCopyErrors" type="button" title="Sao chép báo cáo lỗi vào Clipboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Sao chép báo cáo
+        </button>
+
+        <button class="btn btn-primary" id="btnExportExcel" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Xuất file Excel lỗi
+        </button>
+      </div>
+    </div>
+
+    <!-- Error Results Table -->
+    <div class="table-card" id="tableCard">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 55px; text-align: center;">STT</th>
+              <th style="width: 170px;">Mã Lệnh PGD</th>
+              <th style="width: 110px;">Dòng Excel</th>
+              <th style="width: 220px;">Công đoạn & Phân loại</th>
+              <th>Mô tả chi tiết vi phạm & Khuyến nghị</th>
+              <th style="width: 150px;">Mức độ</th>
+              <th style="width: 120px; text-align: right;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="anomalyTableBody">
+            <!-- Will be populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3>Không tìm thấy lỗi nào phù hợp</h3>
+        <p>Thử đổi bộ lọc hoặc tải file dữ liệu báo công Excel mới</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Routing Lifecycle Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Chi tiết Routing Lệnh Phái Công</h3>
+        <button class="close-btn" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="timelineContainer" class="timeline-container">
+          <!-- Step timeline generated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

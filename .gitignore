@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Vercel
+.vercel
+
+# Environment & logs
+.env
+.env.local
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary and local test files
+scratch/
